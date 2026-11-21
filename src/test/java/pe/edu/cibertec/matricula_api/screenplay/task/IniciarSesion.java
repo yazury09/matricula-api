@@ -1,5 +1,6 @@
 package pe.edu.cibertec.matricula_api.screenplay.task;
 
+import io.restassured.response.Response;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.rest.SerenityRest;
 import net.serenitybdd.screenplay.Actor;
@@ -30,7 +31,10 @@ public class IniciarSesion implements Task {
                         .with(req -> req.contentType(ContentType.JSON)
                                 .body(Map.of("username", usuario, "password", clave)))
         );
-        String token = SerenityRest.lastResponse().path("accessToken");
-        actor.remember("token", token);
+        Response respuesta = SerenityRest.lastResponse();
+        if (respuesta.statusCode() == 200) {
+            actor.remember("token", respuesta.jsonPath().getString("accessToken"));
+            actor.remember("refreshToken", respuesta.jsonPath().getString("refreshToken"));
+        }
     }
 }
